@@ -1,0 +1,36 @@
+{
+  "name": "rumble",
+  "version": "1.0.0",
+  "description": "Notifies via the USGS earthquake API to your phone when a notable earthquake has hit your subscribed area",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./spec/rumble-test.js",
+    "stage": "zip -q -9 -0 -r bin/rumble.zip src/ node_modules/ index.js package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PelkaRepo/rumble.git"
+  },
+  "keywords": [
+    "rumble",
+    "usgs",
+    "earthquake",
+    "quake",
+    "seismic",
+    "warning"
+  ],
+  "author": "amp5208",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PelkaRepo/rumble/issues"
+  },
+  "homepage": "https://github.com/PelkaRepo/rumble#readme",
+  "dependencies": {
+    "aws-sdk": "^2.186.0",
+    "request": "^2.83.0"
+  },
+  "devDependencies": {
+    "lambda-tester": "2.x",
+    "mocha": "^5.0.0"
+  }
+}

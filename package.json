@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha ./spec/rumble-test.js",
-    "stage": "zip -q -9 -0 -r ./bin/rumble.zip ./src/ ./node_modules/ ./index.js ./package.json"
+    "stage": "zip -q -9 -0 -r ./bin/rumble.zip ./node_modules/ ./index.js ./package.json"
   },
   "repository": {
     "type": "git",

@@ -1,3 +1,4 @@
+dist: xenial
 language: node_js
 node_js:
   - "4"
@@ -7,3 +8,7 @@ before_script:
 script:
   - "npm run test"
   - "npm run stage"
+cache:
+  directories:
+    - "node_modules"
+    - "bin"

@@ -34,7 +34,7 @@ resource "aws_lambda_function" "rumble" {
   filename         = "${var.lambda_zip_dir}/rumble.zip"
   function_name    = "rumble"
   role             = "${aws_iam_role.iam_for_lambda.arn}"
-  handler          = "exports.rumbler"
+  handler          = "index.rumbler"
   source_code_hash = "${base64sha256(file("${var.lambda_zip_dir}/rumble.zip"))}"
   runtime          = "nodejs4.3"
 

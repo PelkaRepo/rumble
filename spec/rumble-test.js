@@ -1,25 +1,33 @@
-const LambdaTester = require('lambda-tester');
-const rumbler = require('../index').rumbler;
-var expect = require("chai").expect;
-var index = require("../index");
+const LambdaTester = require('lambda-tester'),
+  rumbler = require('../index').rumbler;
+var aws = require('aws-sdk-mock'),
+  AWS = require('aws-sdk');
+expect = require("chai").expect,
+  index = require("../index");
 
 describe('rumbler', function() {
   beforeEach(function() {
+    process.env.AWS_REGION = 'us-west-2';
+    AWS.config.region = process.env.AWS_REGION;
     process.env.SOURCE_URL = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson';
+    process.env.RUMBLER_TOPIC_ARN = 'arn:aws:sns:us-west-2:123456789012:topic:rumbler-fake';
   });
 
   it('test success', function() {
     return LambdaTester(rumbler)
       .event({
-        name: 'foo-bar'
+        Message: 'test-message'
       })
-      .expectResult();
+      .expectResult(function(response) {
+        expect(response).to.not.be.null;
+      });
   });
 });
 
 describe('index', function() {
   beforeEach(function() {
     process.env.SOURCE_URL = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson';
+    process.env.RUMBLER_TOPIC_ARN = 'arn:aws:sns:us-west-2:123456789012:topic:rumbler-fake';
   });
 
   describe('URL source retrieval', function() {
@@ -34,6 +42,21 @@ describe('index', function() {
       expect(function() {
         get_source_url();
       }).to.throw('There was no source API URL from which to access seismic data');
+    });
+  });
+
+  describe('Rumbler topic ARN retrieval', function() {
+    it('can retrieve a topic ARN for the rumbler if present in Lambda environment variables', function() {
+      expect(get_rumbler_topic_arn()).to.equal('arn:aws:sns:us-west-2:123456789012:topic:rumbler-fake');
+    });
+  });
+
+  describe('Rumbler topic ARN retrieval', function() {
+    it('to throw an error if rumbler topic ARN is not present', function() {
+      process.env.RUMBLER_TOPIC_ARN = '';
+      expect(function() {
+        get_rumbler_topic_arn();
+      }).to.throw('There was no Rumbler SNS topic to which events should be published');
     });
   });
 

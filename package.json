@@ -32,6 +32,7 @@
     "request": "^2.83.0"
   },
   "devDependencies": {
+    "aws-sdk-mock": "^1.7.0",
     "chai": "^4.1.2",
     "lambda-tester": "2.x",
     "mocha": "^5.0.0"

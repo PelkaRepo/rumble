@@ -12,7 +12,6 @@ provider "aws" {
 
 resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_lambda"
-
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -20,7 +19,8 @@ resource "aws_iam_role" "iam_for_lambda" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "lambda.amazonaws.com"
+        "Service": "lambda.amazonaws.com",
+        "Service": "sns.amazonaws.com"
       },
       "Effect": "Allow",
       "Sid": ""
@@ -30,24 +30,39 @@ resource "aws_iam_role" "iam_for_lambda" {
 EOF
 }
 
-resource "aws_lambda_permission" "allow_cloudwatch_to_rumble" {
-    statement_id = "AllowExecutionFromCloudWatch-rumble"
-    action = "lambda:InvokeFunction"
-    function_name = "${aws_lambda_function.rumble.function_name}"
-    principal = "events.amazonaws.com"
-    source_arn = "${aws_cloudwatch_event_rule.every_ten_minutes.arn}"
+resource "aws_iam_role_policy" "lambda_rights" {
+  name = "lambda_rights"
+  role = "${aws_iam_role.iam_for_lambda.id}"
+  policy =  <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+              "SNS:Subscribe",
+              "SNS:Publish",
+              "SNS:ListSubscriptionsByTopic"
+            ],
+            "Effect": "Allow",
+            "Resource": ["${module.rumbler.rumbler_arn}"]
+        }
+    ]
+}
+EOF
 }
 
-resource "aws_cloudwatch_event_rule" "every_ten_minutes" {
-    name = "every-ten-minutes"
-    description = "Fires every ten minutes"
-    schedule_expression = "rate(10 minutes)"
+
+module "rumbler" {
+  source  = "./modules/rumbler"
+  aws_account_id = "${var.aws_account_id}"
+  aws_region = "${var.aws_region}"
 }
 
-resource "aws_cloudwatch_event_target" "poll_seismic_source" {
-    rule = "${aws_cloudwatch_event_rule.every_ten_minutes.name}"
-    target_id = "rumble"
-    arn = "${aws_lambda_function.rumble.arn}"
+module "trigger" {
+  source  = "./modules/trigger"
+  aws_region = "${var.aws_region}"
+  function_name = "${aws_lambda_function.rumble.function_name}"
+  function_arn = "${aws_lambda_function.rumble.arn}"
 }
 
 resource "aws_lambda_function" "rumble" {
@@ -59,7 +74,8 @@ resource "aws_lambda_function" "rumble" {
   runtime          = "nodejs4.3"
 
   environment {
-    variables = {
+    variables {
+      RUMBLER_TOPIC_ARN = "${module.rumbler.rumbler_arn}",
       SOURCE_URL = "${var.source_url}"
     }
   }

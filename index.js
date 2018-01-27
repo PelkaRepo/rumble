@@ -3,12 +3,12 @@ var AWS = require('aws-sdk'),
   request = require('request'),
   jsonpath = require('jsonpath'),
   jsonlint = require("jsonlint");
-AWS.config.update({
-  region: process.env.AWS_REGION
-});
+AWS.config.region = (process.env.AWS_REGION !== '' && process.env.AWS_REGION !== undefined) ? process.env.AWS_REGION : 'us-west-2';
 
 exports.rumbler = function(event, context, callback) {
+  var sns = new AWS.SNS();
   var source_url = get_source_url();
+  var rumbler_topic_arn = get_rumbler_topic_arn();
   request.get({
       url: source_url,
       headers: [{
@@ -16,7 +16,21 @@ exports.rumbler = function(event, context, callback) {
         value: 'application/json'
       }]
     }, function(error, response, body) {
-      callback(null, parse_usgs_rumbles(JSON.parse(response.body)));
+      var rumbles = parse_usgs_rumbles(JSON.parse(response.body));
+
+      sns.publish({
+          Message: JSON.stringify(rumbles),
+          TargetArn: rumbler_topic_arn
+      }, function(e, data) {
+          if (e) {
+              console.log("There was a problem publishing to the rumbler topic: " + e.stack);
+              callback(e);
+              return;
+          }
+          context.done(null, 'Push event sent to registered users');
+      });
+
+      callback(null, rumbles);
     })
     .on('error', function(e) {
       throw new Error('There was a problem processing the URL request to ' + source_url + ': ' + e)
@@ -30,6 +44,15 @@ get_source_url = function(callback) {
     throw new Error('There was no source API URL from which to access seismic data');
   }
   return source_url;
+}
+
+get_rumbler_topic_arn = function(callback) {
+  var rumbler_topic_arn = process.env.RUMBLER_TOPIC_ARN;
+
+  if (rumbler_topic_arn === EMPTY) {
+    throw new Error('There was no Rumbler SNS topic to which events should be published');
+  }
+  return rumbler_topic_arn;
 }
 
 // TODO: This should reference a data object model and/or a schema, in hindsight

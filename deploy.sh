@@ -5,5 +5,9 @@ if [ $(whoami) != "root" ]; then
 fi
 
 npm run stage
-terraform init ./terraform/rumble/
+if [[ -d ./terraform ]]; then
+  echo 'Already initialized terraform.'
+else
+  terraform init ./terraform/rumble/
+fi
 terraform plan -out .terraform/terraform.tfplan ./terraform/rumble/

@@ -56,6 +56,7 @@ module "rumbler" {
   source  = "./modules/rumbler"
   aws_account_id = "${var.aws_account_id}"
   aws_region = "${var.aws_region}"
+  subscribers = "${var.subscribers}"
 }
 
 module "trigger" {

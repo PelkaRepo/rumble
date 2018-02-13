@@ -55,8 +55,9 @@ data "aws_iam_policy_document" "sns-topic-policy" {
 }
 
 resource "aws_sns_topic_subscription" "receiver_of_rumbles" {
+  count = "${length(var.subscribers)}"
   topic_arn = "${aws_sns_topic.rumbler.arn}"
   protocol  = "sms"
   endpoint_auto_confirms = "true"
-  endpoint  = "1-814-553-6737"
+  endpoint  = "${element(var.subscribers, count.index)}"
 }

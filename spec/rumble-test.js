@@ -265,13 +265,13 @@ describe('index', function() {
       it('can filter only for rumbles within a given location', function() {
         expectedRumbles = [ 'Oregon' ];
         actualRumbles = parse_usgs_rumbles(testBody);
-        expect(filter_rumbles(actualRumbles).size).to.equal(expectedRumbles.size);
+        expect(filter_rumbles(actualRumbles)).to.deep.equal(expectedRumbles);
       });
 
       it('will return a blank result if no locations are provided', function() {
         expectedRumbles = [];
         actualRumbles = parse_usgs_rumbles(testBodyWithoutRegisteredLocation);
-        expect(filter_rumbles(actualRumbles).size).to.equal(expectedRumbles.size);
+        expect(filter_rumbles(actualRumbles)).to.deep.equal(expectedRumbles);
       });
     });
   });

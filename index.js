@@ -18,19 +18,22 @@ exports.rumbler = function(event, context, callback) {
         value: 'application/json'
       }]
     }, function(error, response, body) {
-      var rumbles = parse_usgs_rumbles(JSON.parse(response.body));
+      var rumbles = filter_rumbles(parse_usgs_rumbles(JSON.parse(response.body)));
 
-      sns.publish({
-          Message: JSON.stringify(rumbles),
-          TargetArn: rumbler_topic_arn
-      }, function(e, data) {
-          if (e) {
-              console.log("There was a problem publishing to the rumbler topic: " + e.stack);
-              callback(e);
-              return;
-          }
-          context.done(null, 'Push event sent to registered users');
-      });
+      if (rumbles.length > 0) {
+        console.log('Rumbling in ' + rumbles);
+        sns.publish({
+            Message: JSON.stringify(rumbles),
+            TargetArn: rumbler_topic_arn
+        }, function(e, data) {
+            if (e) {
+                console.log("There was a problem publishing to the rumbler topic: " + e.stack);
+                callback(e);
+                return;
+            }
+            context.done(null, 'Push event sent to registered users');
+        });
+      }
 
       callback(null, rumbles);
     })
@@ -78,5 +81,5 @@ parse_usgs_rumbles = function(seismic_data) {
 }
 
 filter_rumbles = function(unfiltered_rumbles) {
-  return _.where(unfiltered_rumbles, REGISTERED_LOCATION);
+  return _.filter(unfiltered_rumbles, function(location){ return location.toLowerCase() === REGISTERED_LOCATION.toLowerCase()});
 }

@@ -10,4 +10,13 @@ if [[ -d ./terraform ]]; then
 else
   terraform init ./terraform/rumble/
 fi
-terraform plan -out .terraform/terraform.tfplan ./terraform/rumble/
+
+if [[ -z $1 ]]; then
+  echo -p 'Please enter phone numbers to have as default subscribers, as a standard list, e.g.,  ["1-888-888-8888","1-888-888-8888"]: '
+  read PHONE_NUMS
+else
+  echo 'Setting default subscribers based on headless input...'
+  PHONE_NUMS=$1
+fi
+
+terraform plan -var "subscribers=${PHONE_NUMS}" -out .terraform/terraform.tfplan ./terraform/rumble/

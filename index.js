@@ -1,8 +1,10 @@
-const EMPTY = '';
+const EMPTY = '',
+  REGISTERED_LOCATION = 'Oregon';
 var AWS = require('aws-sdk'),
   request = require('request'),
   jsonpath = require('jsonpath'),
-  jsonlint = require("jsonlint");
+  jsonlint = require("jsonlint"),
+  _ = require('underscore');
 AWS.config.region = (process.env.AWS_REGION !== '' && process.env.AWS_REGION !== undefined) ? process.env.AWS_REGION : 'us-west-2';
 
 exports.rumbler = function(event, context, callback) {
@@ -73,4 +75,8 @@ parse_usgs_rumbles = function(seismic_data) {
   } catch (e) {
     throw new Error('Seismic data for USGS source did not contain validly parsable data: ' + e);
   }
+}
+
+filter_rumbles = function(unfiltered_rumbles) {
+  return _.where(unfiltered_rumbles, REGISTERED_LOCATION);
 }

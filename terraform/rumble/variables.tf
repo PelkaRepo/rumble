@@ -27,3 +27,9 @@ variable "subscribers" {
   type = "list"
   default = []
 }
+
+variable "rumble_frequency" {
+  description = "The frequency in minutes on which to trigger a cycle of rumble checks.  Defaults to 1 day"
+  type = "string"
+  default = "1440"
+}

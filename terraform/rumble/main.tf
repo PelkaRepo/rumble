@@ -64,6 +64,7 @@ module "trigger" {
   aws_region = "${var.aws_region}"
   function_name = "${aws_lambda_function.rumble.function_name}"
   function_arn = "${aws_lambda_function.rumble.arn}"
+  rumble_frequency = "${var.rumble_frequency}"
 }
 
 resource "aws_lambda_function" "rumble" {

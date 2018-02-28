@@ -15,17 +15,17 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_rumble" {
     action = "lambda:InvokeFunction"
     function_name = "${var.function_name}"
     principal = "events.amazonaws.com"
-    source_arn = "${aws_cloudwatch_event_rule.every_ten_minutes.arn}"
+    source_arn = "${aws_cloudwatch_event_rule.on_cadence.arn}"
 }
 
-resource "aws_cloudwatch_event_rule" "every_ten_minutes" {
-    name = "every-ten-minutes"
-    description = "Fires every ten minutes"
-    schedule_expression = "rate(10 minutes)"
+resource "aws_cloudwatch_event_rule" "on_cadence" {
+    name = "on_cadence"
+    description = "Fires every ${var.rumble_frequency} minutes"
+    schedule_expression = "rate(${var.rumble_frequency} minutes)"
 }
 
 resource "aws_cloudwatch_event_target" "poll_seismic_source" {
-    rule = "${aws_cloudwatch_event_rule.every_ten_minutes.name}"
+    rule = "${aws_cloudwatch_event_rule.on_cadence.name}"
     target_id = "rumble"
     arn = "${var.function_arn}"
 }

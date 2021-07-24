@@ -30,7 +30,7 @@
     "jsonlint": "^1.6.2",
     "jsonpath": "^1.0.0",
     "request": "^2.83.0",
-    "underscore": "^1.8.3"
+    "underscore": "^1.12.1"
   },
   "devDependencies": {
     "aws-sdk-mock": "^1.7.0",
